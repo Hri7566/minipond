@@ -8,6 +8,7 @@ const path = require("path");
 const { WebSocketServer } = require("ws");
 const EventEmitter = require("events");
 const crypto = require("crypto");
+const { PrismaClient } = require("@prisma/client");
 
 // Initialize Fastify
 const app = fastify();
@@ -66,14 +67,24 @@ wss.on("connection", (ws, req) => {
 const serverParticipant = {
   name: "fishing",
   _id: "server",
+  color: "#8d3f50",
 };
 
-function broadcastChat(str) {
+function broadcastMessage(msg) {
   for (const ws of wss.clients) {
-    if (!ws.client.destroyed) {
-      ws.client.sendChatMessage(serverParticipant, str);
-    }
+    if (!ws.client) continue;
+    if (ws.client.destroyed) continue;
+    ws.client.sendArray([msg]);
   }
+}
+
+function broadcastChat(str) {
+  broadcastMessage({
+    m: "a",
+    p: serverParticipant,
+    a: str,
+    t: Date.now(),
+  });
 }
 
 // WebSocket Client
@@ -95,10 +106,25 @@ class Client extends EventEmitter {
       this.ip = req.headers["x-forwarded-for"];
     }
 
-    console.log(this.ip);
+    this._id = Randy.getIDFromIP(this.ip);
+
+    (async () => {
+      this.user = await Data.getUser(this._id);
+
+      if (!this.user) {
+        this.user = {
+          _id: this._id,
+          name: Data.defaultUserData.name,
+          color: Randy.getColorFromID(this._id),
+        };
+      }
+
+      this.emit("loaded");
+    })();
   }
 
   sendArray(msgs) {
+    // Send an array of messages to the client
     try {
       this.ws.send(JSON.stringify(msgs));
     } catch (err) {
@@ -107,12 +133,32 @@ class Client extends EventEmitter {
   }
 
   destroy() {
+    // Render this client unusable
     this.ws.close();
     this.removeAllListeners();
     this.destroyed = true;
   }
 
+  getParticipant() {
+    // Get this client's live user data
+    if (!this.loaded) {
+      return {
+        _id: this._id,
+        name: "Anonymous",
+        color: "#777",
+      };
+    }
+
+    return {
+      _id: this._id,
+      name: this.user.name,
+      color: this.user.color,
+    };
+  }
+
   bindEventListeners() {
+    // Add all event listeners
+
     this.ws.on("message", (data, isBinary) => {
       if (isBinary) return;
 
@@ -122,7 +168,14 @@ class Client extends EventEmitter {
         for (const msg of msgs) {
           this.emit(msg.m, msg);
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    this.on("loaded", (msg) => {
+      if (msg) return;
+      this.loaded = true;
     });
 
     this.on("t", (msg) => {
@@ -139,12 +192,25 @@ class Client extends EventEmitter {
       this.sendArray([res]);
     });
 
-    this.on("a", (msg) => {});
+    this.on("a", (msg) => {
+      if (!this.loaded) return;
+      if (!msg.message) return;
+
+      const res = {
+        m: "a",
+        p: this.getParticipant(),
+        a: msg.message.split("\n").join(" "),
+        t: Date.now(),
+      };
+
+      broadcastMessage(res);
+
+      CommandHandler.handleCommand(res);
+    });
   }
 }
 
 // ID & color generator
-
 class Randy {
   static getRandomID() {
     // Get 24 chars of random hex
@@ -167,5 +233,96 @@ class Randy {
     hash.update(id);
     hash.update(env.SALT);
     return "#" + hash.digest("hex").substring(0, 6);
+  }
+}
+
+/**
+ * Data
+ */
+
+// Prisma setup
+const prisma = new PrismaClient();
+
+// Data handler
+class Data {
+  static defaultUserData = {
+    name: "Anonymous",
+    color: "#777",
+  };
+
+  static async createUser(user) {
+    await prisma.user.create({
+      data: {
+        id: user._id,
+        name: user.name,
+        color: user.color || "#777",
+        flags: user.flags || {},
+      },
+    });
+  }
+
+  static async getUser(_id) {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: _id,
+      },
+    });
+
+    return user;
+  }
+
+  static async updateUser(_id, user) {
+    await prisma.user.update({
+      where: {
+        id: _id,
+      },
+      data: {
+        id: user._id,
+        name: user.name,
+        color: user.color,
+        flags: user.flags,
+      },
+    });
+  }
+
+  static async deleteUser(_id) {
+    await prisma.user.delete({
+      where: {
+        id: _id,
+      },
+    });
+  }
+}
+
+/**
+ * Commands
+ */
+
+class CommandHandler {
+  static commands = require("./commands");
+
+  static handleCommand(message) {
+    let msg = message;
+    if (msg.m !== "a") return;
+
+    msg.args = msg.a.split(" ");
+    msg.argcat = msg.a.substring(msg.args[0].length).trim();
+
+    // Find which command should be run
+    for (const command of this.commands) {
+      let usedAlias;
+
+      for (const alias of command.aliases) {
+        if (alias == msg.args[0]) {
+          usedAlias = alias;
+          break;
+        }
+      }
+
+      if (!usedAlias) continue;
+
+      // Run the command
+      command.callback(msg, broadcastChat);
+    }
   }
 }

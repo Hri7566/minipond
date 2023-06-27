@@ -1,6 +1,7 @@
 html {
     color: white;
     background: black;
+    font-family: 24pt Verdana, Geneva, Tahoma, sans-serif;
 }
 
 #chat {
@@ -21,4 +22,8 @@ html {
     text-shadow: #888 1px 1px;
     color: #fff;
     border-radius: 4px;
+}
+
+#chat ul {
+    list-style-type: none;
 }

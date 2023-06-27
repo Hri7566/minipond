@@ -91,6 +91,9 @@ class Client extends EventEmitter {
 
     this.ws.addEventListener("close", () => {
       clearInterval(this.pingInterval);
+      setTimeout(() => {
+        this.connect();
+      }, 1000);
     });
 
     this.ws.addEventListener("message", (evt) => {

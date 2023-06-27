@@ -24,6 +24,21 @@ $(() => {
     console.log("Connected");
   });
 
+  cl.on("a", (msg) => {
+    // Add chat message to chat list
+    const li = $(
+      `<li><span class="name"></span> <span class="message"></span></li>`
+    );
+
+    li.find(".name").text(msg.p.name + ":");
+    li.find(".message").text(msg.a);
+    li.css("color", msg.p.color || "white");
+
+    $("#chat ul").append(li);
+
+    console.log(msg);
+  });
+
   $("#chat-input").on("keydown", (evt) => {
     if (evt.originalEvent.key == "Enter") {
       // Submit message & clear
