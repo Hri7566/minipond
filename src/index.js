@@ -10,6 +10,9 @@ const EventEmitter = require("events");
 const crypto = require("crypto");
 const { PrismaClient } = require("@prisma/client");
 
+// Chat history
+let chatHistory = [];
+
 // Initialize Fastify
 const app = fastify();
 
@@ -102,9 +105,15 @@ class Client extends EventEmitter {
       !!req.headers["x-forwarded-for"]
     ) {
       // TODO debug this
-      console.log(req.headers["x-forwarded-for"]);
+      // console.log(req.headers["x-forwarded-for"]);
       this.ip = req.headers["x-forwarded-for"];
     }
+
+    if (this.ip.startsWith("::ffff:")) {
+      this.ip = this.ip.substring("::ffff:".length);
+    }
+
+    console.log(this.ip);
 
     this._id = Randy.getIDFromIP(this.ip);
 
@@ -156,6 +165,16 @@ class Client extends EventEmitter {
     };
   }
 
+  sendChatHistory(history) {
+    // Send the last 50 messages to the client
+    this.sendArray([
+      {
+        m: "c",
+        c: history.slice(history.length - 50, history.length),
+      },
+    ]);
+  }
+
   bindEventListeners() {
     // Add all event listeners
 
@@ -178,13 +197,23 @@ class Client extends EventEmitter {
       this.loaded = true;
     });
 
+    this.on("hi", (msg) => {
+      // Handshake message handler
+
+      // Send chat history
+      this.sendChatHistory(chatHistory);
+    });
+
     this.on("t", (msg) => {
+      // Time message handler
+
       // Send server's time to client
       const res = {
         m: "t",
         t: Date.now(),
       };
 
+      // Optional echo
       if (msg.e) {
         res.e = msg.e;
       }
@@ -193,6 +222,9 @@ class Client extends EventEmitter {
     });
 
     this.on("a", (msg) => {
+      // Chat message handler
+
+      // Verify message
       if (!this.loaded) return;
       if (!msg.message) return;
 
@@ -203,7 +235,11 @@ class Client extends EventEmitter {
         t: Date.now(),
       };
 
+      // Send to every client
       broadcastMessage(res);
+
+      // Add to chat history
+      chatHistory.push(res);
 
       CommandHandler.handleCommand(res);
     });

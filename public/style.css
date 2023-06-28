@@ -1,7 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital@0;1&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+}
+
 html {
     color: white;
     background: black;
-    font-family: 24pt Verdana, Geneva, Tahoma, sans-serif;
+    font: 20pt 'Open Sans', verdana, "DejaVu Sans", sans-serif;
 }
 
 #chat {

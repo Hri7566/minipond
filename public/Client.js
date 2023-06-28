@@ -51,13 +51,14 @@ class Client extends EventEmitter {
   constructor(uri) {
     super();
     this.uri = uri;
-    this.ws;
+    this.ws = undefined;
     this.started = false;
 
     this.bindEventListeners();
   }
 
   start() {
+    // Start the client
     if (this.started) return false;
     this.started = true;
     this.connect();
@@ -65,6 +66,7 @@ class Client extends EventEmitter {
   }
 
   stop() {
+    // Stop the client
     if (!this.started) return false;
 
     if (this.ws) {
@@ -75,13 +77,18 @@ class Client extends EventEmitter {
   }
 
   connect() {
+    // Connect to the websocket server
     if (!this.started) return;
 
     this.emit("status", "Connecting...");
     this.ws = new WebSocket(this.uri);
 
+    // Add WebSocket listeners
     this.ws.addEventListener("open", () => {
       this.emit("connected");
+
+      // Send handshake message
+      this.sendArray([{ m: "hi" }]);
 
       this.pingInterval = setInterval(() => {
         // Ping server every 20s
