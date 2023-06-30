@@ -1,3 +1,5 @@
+const { Data } = require("./Data");
+
 class Command {
   constructor(id, aliases, callback) {
     this.id = id;
@@ -14,6 +16,13 @@ function underline(str) {
 }
 
 const fishermen = new Map();
+
+const fishInterval = setInterval(() => {
+  // Fishing random chance algorithm
+  // for generating fish for people
+  // who are fishing
+  // TODO
+});
 
 commands.push(
   new Command(

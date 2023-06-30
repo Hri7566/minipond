@@ -14,5 +14,11 @@ model User {
   id    String @id @unique
   name  String
   color String
-  flags Json
+  sack  Sack?
+}
+
+model Sack {
+  id     Int    @id
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
 }
