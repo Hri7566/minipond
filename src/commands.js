@@ -9,6 +9,8 @@ class Command {
 }
 
 const commands = [];
+const chanceToCatchFish = 0.2; // 2% chance every
+const fishCatchIntervalTime = 1000; // 1 second
 
 function underline(str) {
   // Intertwine characters with underline unicode
@@ -21,8 +23,15 @@ const fishInterval = setInterval(() => {
   // Fishing random chance algorithm
   // for generating fish for people
   // who are fishing
-  // TODO
-});
+
+  let rUser = fishermen.get(Math.floor(Math.random() * [...fishermen].length));
+  let r = Math.random() * 1;
+
+  if (r < chanceToCatchFish) {
+    // TODO give user random fish
+    // TODO implement higher chance with items
+  }
+}, fishCatchIntervalTime);
 
 commands.push(
   new Command(
@@ -52,6 +61,7 @@ commands.push(
       );
     }
   })
+  // TODO shop
 );
 
 module.exports = commands;
