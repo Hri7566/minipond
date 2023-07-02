@@ -18,6 +18,7 @@ class Data {
         name: user.name,
         color: user.color || "#777",
         flags: user.flags || {},
+        location: user.location,
       },
     });
   }
