@@ -17,6 +17,11 @@ function underline(str) {
   return str.split("").join("\u035f");
 }
 
+function getRandomFish() {
+  // Get a random fish from the fish list
+  // TODO
+}
+
 const fishermen = new Map();
 
 const fishInterval = setInterval(() => {
