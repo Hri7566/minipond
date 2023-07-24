@@ -57,6 +57,9 @@ $(() => {
     console.log(msg);
     if (!msg.c) return;
 
+    // Wipe chat
+    $("#chat ul li").remove();
+
     for (const a of msg.c) {
       // Pretend to receive this chat message
       renderChatMessage(a);

@@ -11,7 +11,41 @@ const crypto = require("crypto");
 const { Data } = require("./Data");
 
 // Chat history
+const chatHistoryFile = "chatHistory.json"
 let chatHistory = [];
+
+function loadChatHistory(file = chatHistoryFile) {
+  // Load chat history from file\
+  console.log(`Loading chat history`);
+  chatHistory = JSON.parse(fs.readFileSync(file).toString());
+  console.debug("chat history:", chatHistory)
+}
+
+function saveChatHistory(file = chatHistoryFile) {
+  // Save chat history to file
+  console.log(`Saving chat history`);
+  console.log("chat history saving:", chatHistory);
+  fs.writeFileSync(file, JSON.stringify(chatHistory));
+}
+
+// Load chat history on startup
+try {
+  // Create file before trying
+  const files = fs.readdirSync(".");
+  if (!files.includes(chatHistoryFile)) {
+    fs.writeFileSync(chatHistoryFile, JSON.stringify(chatHistory));
+  }
+  loadChatHistory();
+} catch (err) {
+  console.error(`Could not load chat history:`, err);
+  process.exit(1);
+}
+
+// Save chat history every few seconds
+//? Because saving on every message lags,
+//? I decided to save on an interval
+const chatHistorySaveTime = 5000;
+const chatHistorySaveInterval = setInterval(() => saveChatHistory(), 5000);
 
 // Initialize Fastify
 const app = fastify();
