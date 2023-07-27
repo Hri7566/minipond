@@ -1,36 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital@0;1&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital@0;1&display=swap");
 
 * {
-    padding: 0;
-    margin: 0;
+  padding: 0;
+  margin: 0;
 }
 
 html {
-    color: white;
-    background: black;
-    font: 20pt 'Open Sans', verdana, "DejaVu Sans", sans-serif;
+  color: white;
+  background: black;
+  font: 20pt "Open Sans", verdana, "DejaVu Sans", sans-serif;
 }
 
 #chat {
-    position: fixed;
-    bottom: 64px;
-    left: 0;
-    width: 100%;
-    font-size: 13px;
-    color: #fff;
-    text-shadow: #888 1px 1px;
+  position: fixed;
+  bottom: 64px;
+  left: 0;
+  width: 100%;
+  font-size: 14px;
+  color: #fff;
+  text-shadow: #888 1px 1px;
 }
 
 #chat-input {
-    margin: 4px;
-    width: 99%;
-    border: 1px solid #fff;
-    background: 0 0;
-    text-shadow: #888 1px 1px;
-    color: #fff;
-    border-radius: 4px;
+  margin: 4px;
+  width: 99%;
+  border: 1px solid #fff;
+  background: 0 0;
+  text-shadow: #888 1px 1px;
+  color: #fff;
+  border-radius: 4px;
 }
 
 #chat ul {
-    list-style-type: none;
+  list-style-type: none;
 }

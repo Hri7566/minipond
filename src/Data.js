@@ -11,6 +11,8 @@ class Data {
     color: "#777",
   };
 
+  // User CRUD
+
   static async createUser(user) {
     await prisma.user.create({
       data: {
@@ -51,6 +53,52 @@ class Data {
     await prisma.user.delete({
       where: {
         id: _id,
+      },
+    });
+  }
+
+  // Fish sack CRUD
+
+  static async createSack(sack) {
+    await prisma.sack.create({
+      data: {
+        id: sack.id,
+        userId: sack.userId,
+      },
+    });
+  }
+
+  static async getSack(sackId) {
+    const sack = await prisma.sack.findUnique({
+      where: {
+        id: sackId,
+      },
+    });
+
+    return sack;
+  }
+
+  static async getSackByUserId(userId) {
+    const sack = await prisma.sack.findUnique({
+      where: { userId },
+    });
+
+    return sack;
+  }
+
+  static async updateSack(sack) {
+    await prisma.sack.update({
+      where: {
+        id: sack.id,
+      },
+      data: sack,
+    });
+  }
+
+  static async deleteSack(sackId) {
+    await prisma.sack.delete({
+      where: {
+        id: sackId,
       },
     });
   }

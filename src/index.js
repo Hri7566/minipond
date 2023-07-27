@@ -11,20 +11,18 @@ const crypto = require("crypto");
 const { Data } = require("./Data");
 
 // Chat history
-const chatHistoryFile = "chatHistory.json"
+const chatHistoryFile = "chatHistory.json";
 let chatHistory = [];
 
 function loadChatHistory(file = chatHistoryFile) {
-  // Load chat history from file\
+  // Load chat history from file
   console.log(`Loading chat history`);
   chatHistory = JSON.parse(fs.readFileSync(file).toString());
-  console.debug("chat history:", chatHistory)
 }
 
 function saveChatHistory(file = chatHistoryFile) {
   // Save chat history to file
-  console.log(`Saving chat history`);
-  console.log("chat history saving:", chatHistory);
+  // console.log(`Saving chat history`);
   fs.writeFileSync(file, JSON.stringify(chatHistory));
 }
 
@@ -32,9 +30,11 @@ function saveChatHistory(file = chatHistoryFile) {
 try {
   // Create file before trying
   const files = fs.readdirSync(".");
+
   if (!files.includes(chatHistoryFile)) {
     fs.writeFileSync(chatHistoryFile, JSON.stringify(chatHistory));
   }
+
   loadChatHistory();
 } catch (err) {
   console.error(`Could not load chat history:`, err);
@@ -108,6 +108,7 @@ const serverParticipant = {
 };
 
 function broadcastMessage(msg) {
+  // Broadcast a message to all clients
   for (const ws of wss.clients) {
     if (!ws.client) continue;
     if (ws.client.destroyed) continue;
@@ -116,12 +117,19 @@ function broadcastMessage(msg) {
 }
 
 function broadcastChat(str) {
-  broadcastMessage({
+  // Broadcast a chat message
+  const chatMessage = {
     m: "a",
     p: serverParticipant,
     a: str,
     t: Date.now(),
-  });
+  };
+
+  // Send message
+  broadcastMessage(chatMessage);
+
+  // Save to chat history
+  chatHistory.push(chatMessage);
 }
 
 // WebSocket Client
@@ -147,7 +155,7 @@ class Client extends EventEmitter {
       this.ip = this.ip.substring("::ffff:".length);
     }
 
-    console.log(this.ip);
+    console.log("(DEBUG) IP:", this.ip);
 
     this._id = Randy.getIDFromIP(this.ip);
 

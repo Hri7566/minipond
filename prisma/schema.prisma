@@ -19,7 +19,7 @@ model User {
 }
 
 model Sack {
-  id     Int    @id
+  id     Int    @id @unique @default(autoincrement())
   user   User   @relation(fields: [userId], references: [id])
   userId String @unique
 }
