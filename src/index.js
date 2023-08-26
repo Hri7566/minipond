@@ -166,8 +166,11 @@ class Client extends EventEmitter {
         this.user = {
           _id: this._id,
           name: Data.defaultUserData.name,
-          color: Randy.getColorFromID(this._id)
+          color: Randy.getColorFromID(this._id),
+          location: "outside"
         };
+
+        await Data.createUser(this.user);
       }
 
       this.emit("loaded");

@@ -1,3 +1,10 @@
+/**
+ * TODO save fishermen between server restarts
+ * TODO better font
+ * TODO clean up commands
+ * TODO move helper functions to another file
+ */
+
 const { Data } = require("./Data");
 
 const fishList = require("./fishList");
@@ -53,23 +60,38 @@ async function findSack(fisherId) {
   }
 }
 
-function putFishInSack(sackId, fish) {
+async function putFishInSack(sackId, fish) {
   // Give a fish to a user by putting it in their sack
   // TODO
 
-  Data.getSack(sackId);
+  // Get sack this fish belongs to
+  const sack = await Data.getSack(sackId);
+
+  // Convert fish to JSON and verify
+  const jFish = JSON.parse(sack.fish);
+  if (!Array.isArray(jFish)) return false;
+
+  // Add fish to array
+  jFish.push(fish);
+  return true;
 }
 
 const fishInterval = setInterval(async () => {
   // Fishing random chance algorithm
   // Pick random fisherman to give fish
 
+  // Get fisher
   let rFisher = getRandomFisherman();
-  let r = Math.random() * 1;
-
-  // Stop here if there is no user
   if (!rFisher) return void console.log("(DEBUG) no fisher");
   console.log("Picked fisher:", rFisher);
+
+  // Get fisher's user data
+  let user = await Data.getUser(rFisher.userId);
+  console.log(rFisher.userId, user);
+  if (!user) return void console.log("(DEBUG) no fisher's user");
+
+  // Random chance value
+  let r = Math.random() * 1;
 
   if (r < chanceToCatchFish) {
     // TODO give user random fish
@@ -81,12 +103,19 @@ const fishInterval = setInterval(async () => {
 
     if (!sack) {
       // No sack, create one
-      await Data.createSack(rFisher);
+      sack = await Data.createSackForUser(rFisher.userId, {
+        fish: JSON.stringify([])
+      });
     }
 
-    putFishInSack(sack.id, rFish);
+    const errored = await putFishInSack(sack.id, rFish);
 
-    console.log("Random chance requirement reached");
+    if (!errored) {
+      console.log("(DEBUG) Random chance requirement reached");
+
+      // Remove user from fishermen
+      fishermen.delete(rFisher.userId);
+    }
 
     // TODO implement higher chance with items
     // TODO implement items
@@ -124,7 +153,7 @@ commands.push(
         )} minutes ago).`
       );
     } else {
-      // User is not fishing
+      // User is not fishing, make them a fisherman
       fishermen.set(msg.p._id, {
         userId: msg.p._id,
         t: Date.now()
@@ -134,6 +163,19 @@ commands.push(
         `Our friend ${msg.p.name} casts LURE into a water for catching fish.`
       );
     }
+  }),
+
+  new Command("fishing", ["/fishing"], (msg, chat) => {
+    // Return list of fishermen
+    const list = Array.from(fishermen.keys())
+      .map(key => {
+        const value = fishermen.get(key);
+        return `${key}: ${((Date.now() - value.t) / 1000 / 60).toFixed(
+          2
+        )} minutes`;
+      })
+      .join(", ");
+    chat("Current fishermen by user ID: " + (list ? list : "(none)"));
   })
 
   // TODO shop

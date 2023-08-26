@@ -9,7 +9,7 @@ class EventEmitter {
 
     this._events[evtn].push({
       once: false,
-      func,
+      func
     });
   }
 
@@ -29,7 +29,7 @@ class EventEmitter {
 
     this._events[evtn].push({
       once: true,
-      func,
+      func
     });
   }
 
@@ -73,6 +73,7 @@ class Client extends EventEmitter {
       delete this.ws;
     }
 
+    this.started = false;
     return true;
   }
 
@@ -103,7 +104,7 @@ class Client extends EventEmitter {
       }, 1000);
     });
 
-    this.ws.addEventListener("message", (evt) => {
+    this.ws.addEventListener("message", evt => {
       try {
         const messages = JSON.parse(evt.data);
 
@@ -126,7 +127,7 @@ class Client extends EventEmitter {
       }
     });
 
-    this.ws.addEventListener("error", (error) => {
+    this.ws.addEventListener("error", error => {
       this.emit("wserror", error);
     });
   }

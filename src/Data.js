@@ -61,13 +61,19 @@ class Data {
 
   // ANCHOR Fish sack CRUD
 
-  static async createSack(sack) {
-    await prisma.sack.create({
+  static async createSackForUser(userId, sack) {
+    await prisma.user.update({
+      where: {
+        id: userId
+      },
       data: {
-        id: sack.id,
-        userId: sack.userId
+        sack: {
+          create: sack
+        }
       }
     });
+
+    return this.getSackByUserId(userId);
   }
 
   static async getSack(sackId) {
