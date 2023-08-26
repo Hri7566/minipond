@@ -12,7 +12,8 @@ class Command {
 
 const commands = [];
 const chanceToCatchFish = 0.2; // 2% chance every
-const fishCatchIntervalTime = 1000; // 1 second
+// const fishCatchIntervalTime = 1000; // 1 second
+const fishCatchIntervalTime = 500;
 
 // Useful things
 
@@ -29,32 +30,63 @@ function getRandomFish() {
 const fishermen = new Map();
 
 function getRandomFisherman() {
-  // Get a random user who is fishing
-  //? random array value
-  return fishermen.get(Math.floor(Math.random() * fishermen.length));
+  // Get a random fisherman
+  try {
+    const values = Array.from(fishermen.values());
+    return values[Math.floor(Math.random() * values.length)];
+  } catch (err) {
+    // No fisher found
+    return undefined;
+  }
+}
+
+/**
+ * Find a fisherman's fishing sack
+ * @param {string} fisherId ID of fisherman whose sack we're looking for
+ * @returns Found sack or null
+ */
+async function findSack(fisherId) {
+  try {
+    return await Data.getSackByUserId(fisherId);
+  } catch (err) {
+    return null;
+  }
 }
 
 function putFishInSack(sackId, fish) {
   // Give a fish to a user by putting it in their sack
   // TODO
+
+  Data.getSack(sackId);
 }
 
-const fishInterval = setInterval(() => {
+const fishInterval = setInterval(async () => {
   // Fishing random chance algorithm
-  //? for generating fish for people
-  //? who are fishing
+  // Pick random fisherman to give fish
 
-  let rUser = getRandomFisherman();
+  let rFisher = getRandomFisherman();
   let r = Math.random() * 1;
 
   // Stop here if there is no user
-  if (!rUser) return;
+  if (!rFisher) return void console.log("(DEBUG) no fisher");
+  console.log("Picked fisher:", rFisher);
 
   if (r < chanceToCatchFish) {
     // TODO give user random fish
-
+    // Get random fish
     const rFish = getRandomFish();
-    putFishInSack(rUser, rFish);
+
+    // Has a sack?
+    const sack = await findSack(rFisher.userId);
+
+    if (!sack) {
+      // No sack, create one
+      await Data.createSack(rFisher);
+    }
+
+    putFishInSack(sack.id, rFish);
+
+    console.log("Random chance requirement reached");
 
     // TODO implement higher chance with items
     // TODO implement items
@@ -95,7 +127,7 @@ commands.push(
       // User is not fishing
       fishermen.set(msg.p._id, {
         userId: msg.p._id,
-        t: Date.now(),
+        t: Date.now()
       });
 
       chat(

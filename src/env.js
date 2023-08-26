@@ -9,8 +9,8 @@ module.exports = {
     isServer: true,
     server: {
       PORT: z.string(),
-      SALT: z.string(),
+      SALT: z.string()
     },
-    runtimeEnv: process.env,
-  }),
+    runtimeEnv: process.env
+  })
 };

@@ -10,14 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "5.0.0",
-    "@t3-oss/env-core": "^0.6.0",
+    "@prisma/client": "5.2.0",
+    "@t3-oss/env-core": "^0.6.1",
     "dotenv": "^16.3.1",
-    "fastify": "^4.18.0",
+    "fastify": "^4.21.0",
     "jquery": "^3.7.0",
     "mime": "^3.0.0",
-    "prisma": "^4.16.1",
+    "prisma": "^4.16.2",
     "ws": "^8.13.0",
-    "zod": "^3.21.4"
+    "zod": "^3.22.2"
   }
 }

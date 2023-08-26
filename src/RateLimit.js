@@ -6,5 +6,5 @@
 class RateLimit {}
 
 module.exports = {
-  RateLimit,
+  RateLimit
 };

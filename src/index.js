@@ -89,12 +89,12 @@ app.get("*", (req, rep) => {
 
 // Open salami
 app.listen({
-  port: env.PORT || 80,
+  port: env.PORT || 80
 });
 
 // Create WebSocket server
 const wss = new WebSocketServer({
-  server: app.server,
+  server: app.server
 });
 
 wss.on("connection", (ws, req) => {
@@ -104,7 +104,7 @@ wss.on("connection", (ws, req) => {
 const serverParticipant = {
   name: "fishing",
   _id: "server",
-  color: "#8d3f50",
+  color: "#8d3f50"
 };
 
 function broadcastMessage(msg) {
@@ -122,7 +122,7 @@ function broadcastChat(str) {
     m: "a",
     p: serverParticipant,
     a: str,
-    t: Date.now(),
+    t: Date.now()
   };
 
   // Send message
@@ -166,7 +166,7 @@ class Client extends EventEmitter {
         this.user = {
           _id: this._id,
           name: Data.defaultUserData.name,
-          color: Randy.getColorFromID(this._id),
+          color: Randy.getColorFromID(this._id)
         };
       }
 
@@ -196,14 +196,14 @@ class Client extends EventEmitter {
       return {
         _id: this._id,
         name: "Anonymous",
-        color: "#777",
+        color: "#777"
       };
     }
 
     return {
       _id: this._id,
       name: this.user.name,
-      color: this.user.color,
+      color: this.user.color
     };
   }
 
@@ -212,8 +212,8 @@ class Client extends EventEmitter {
     this.sendArray([
       {
         m: "c",
-        c: history.slice(history.length - 50, history.length),
-      },
+        c: history.slice(history.length - 50, history.length)
+      }
     ]);
   }
 
@@ -234,25 +234,25 @@ class Client extends EventEmitter {
       }
     });
 
-    this.on("loaded", (msg) => {
+    this.on("loaded", msg => {
       if (msg) return;
       this.loaded = true;
     });
 
-    this.on("hi", (msg) => {
+    this.on("hi", msg => {
       // Handshake message handler
 
       // Send chat history
       this.sendChatHistory(chatHistory);
     });
 
-    this.on("t", (msg) => {
+    this.on("t", msg => {
       // Time message handler
 
       // Send server's time to client
       const res = {
         m: "t",
-        t: Date.now(),
+        t: Date.now()
       };
 
       // Optional echo
@@ -263,7 +263,7 @@ class Client extends EventEmitter {
       this.sendArray([res]);
     });
 
-    this.on("a", (msg) => {
+    this.on("a", msg => {
       // Chat message handler
 
       // Verify message
@@ -274,7 +274,7 @@ class Client extends EventEmitter {
         m: "a",
         p: this.getParticipant(),
         a: msg.message.split("\n").join(" "),
-        t: Date.now(),
+        t: Date.now()
       };
 
       // Send to every client
